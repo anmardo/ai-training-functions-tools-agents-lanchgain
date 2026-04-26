@@ -1,4 +1,4 @@
-﻿import os, openai, json
+﻿import os, openai, json #this training needs to install  openai==0.28.1
 
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file

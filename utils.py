@@ -79,3 +79,47 @@ def openapi_spec_to_tools(spec_text: str):
             callables[operation_id] = make_callable(method, path, parameters)
 
     return tools, callables
+
+from langchain_core.agents import AgentActionMessageLog, AgentFinish
+from langchain_core.messages import AIMessage
+from langchain_core.runnables import RunnableLambda
+
+
+def parse_ai_message_to_agent_action(message: AIMessage):
+    # Case 1: model decided to call a tool
+    if message.tool_calls:
+        tool_call = message.tool_calls[0]
+
+        return AgentActionMessageLog(
+            tool=tool_call["name"],
+            tool_input=tool_call["args"],
+            log=str(message),
+            message_log=[message],
+        )
+
+    # Case 2: model answered directly
+    return AgentFinish(
+        return_values={"output": message.content},
+        log=str(message),
+    )
+
+
+from langchain_core.messages import ToolMessage
+
+
+def format_to_openai_tools(intermediate_steps):
+    messages = []
+
+    for agent_action, observation in intermediate_steps:
+        ai_message = agent_action.message_log[0]
+        tool_call_id = ai_message.tool_calls[0]["id"]
+
+        messages.append(ai_message)
+        messages.append(
+            ToolMessage(
+                tool_call_id=tool_call_id,
+                content=str(observation),
+            )
+        )
+
+    return messages

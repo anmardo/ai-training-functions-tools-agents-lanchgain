@@ -302,7 +302,7 @@ spec = json.loads(text)
 
 # openapi_spec_to_openai_fn does no longer exists, we use the one created as utils
 # but this is only an educational purpose, it doesn't support POST calls for example
-from openapi_spec_to_openai import *
+from utils import *
 pet_openai_functions, pet_callables = openapi_spec_to_tools(text)
 
 print(pet_openai_functions)
